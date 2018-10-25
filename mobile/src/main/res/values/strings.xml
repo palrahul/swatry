@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TrySwapi</string>
+    <string name="title_switem_detail">Switem Detail</string>
+</resources>
