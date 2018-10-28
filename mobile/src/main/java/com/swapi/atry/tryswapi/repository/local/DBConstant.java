@@ -7,7 +7,7 @@ public interface DBConstant {
     String SW_ITEM_TABLE_NAME = "SWItems";
 
     //table fields
-
+    String ID = "id";
     String HOME_WORLD = "homeworld";
     String BIRTH_YEAR = "birth_year";
     String SKIN_COLOR = "skin_color";
@@ -18,7 +18,7 @@ public interface DBConstant {
     String HAIR_COLOR = "hair_color";
     String HEIGHT = "height";
     String SPECIES = "species";
-    String FILMS = "films";
+    String FILMS_ARRAY = "films";
     String GENDER = "gender";
     String MASS = "mass";
     String NAME ="name";

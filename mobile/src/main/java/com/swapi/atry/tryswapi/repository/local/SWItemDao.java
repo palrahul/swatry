@@ -13,8 +13,8 @@ public interface SWItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addSWItem(SWItem swItem);
 
-    @Query("SELECT " + DBConstant.NAME + " FROM  " + DBConstant.SW_ITEM_TABLE_NAME + " WHERE "
-            + DBConstant.NAME + " LIKE " + ":search")
+    @Query("SELECT *" + " FROM  " + DBConstant.SW_ITEM_TABLE_NAME + " WHERE "
+            + DBConstant.NAME + " LIKE " + ":search" + " LIMIT 1")
     SWItem getSWItem(String search);
 
 }

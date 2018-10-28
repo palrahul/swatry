@@ -1,22 +1,37 @@
 package com.swapi.atry.tryswapi;
 
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.swapi.atry.tryswapi.dummy.DummyContent;
+import com.swapi.atry.tryswapi.repository.SWItemRepo;
+import com.swapi.atry.tryswapi.repository.SWItemRepoImpl;
+import com.swapi.atry.tryswapi.repository.dto.SWItem;
+import com.swapi.atry.tryswapi.repository.local.DBConstant;
+import com.swapi.atry.tryswapi.repository.local.SWDB;
+import com.swapi.atry.tryswapi.repository.local.SWLocalRepo;
+import com.swapi.atry.tryswapi.repository.local.SWLocalRepoImpl;
+import com.swapi.atry.tryswapi.repository.remote.SWRemoteRepo;
+import com.swapi.atry.tryswapi.repository.remote.SWRemoteRepoImpl;
 
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 
 /**
  * An activity representing a list of Switems. This activity
@@ -28,11 +43,20 @@ import java.util.List;
  */
 public class SwitemListActivity extends AppCompatActivity {
 
+    private static String TAG = SwitemListActivity.class.getSimpleName();
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
     private boolean mTwoPane;
+    private Disposable disposable;
+
+
+    @Override
+    protected void onDestroy() {
+        if(disposable != null) disposable.dispose();
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +87,38 @@ public class SwitemListActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.switem_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
+
+        /// test
+        SWRemoteRepo swRemoteRepo = new SWRemoteRepoImpl();
+        SWDB swdb = Room.databaseBuilder(getApplicationContext(),
+                    SWDB.class, DBConstant.DB_NAME).build();
+        SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swDao());
+        SWItemRepo swItemRepo = new SWItemRepoImpl(swLocalRepo, swRemoteRepo);
+        disposable = swItemRepo.getSWItem("R2")
+                        .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWItem>() {
+                    @Override
+                    public void onNext(SWItem swItem) {
+                        if(swItem != null)
+                            Log.d(TAG, "Found SW item : " + swItem.getName());
+                        else
+                            Log.d(TAG, "NOPE");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+
+
+        ///end test
+
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
