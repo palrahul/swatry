@@ -1,5 +1,6 @@
 package com.swapi.atry.tryswapi.repository.local;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -16,5 +17,9 @@ public interface SWItemDao {
     @Query("SELECT *" + " FROM  " + DBConstant.SW_ITEM_TABLE_NAME + " WHERE "
             + DBConstant.NAME + " LIKE " + ":search" + " LIMIT 1")
     SWItem getSWItem(String search);
+
+    @Query("SELECT *" + " FROM  " + DBConstant.SW_ITEM_TABLE_NAME + " WHERE "
+            + DBConstant.NAME + " LIKE " + ":search" + " LIMIT 1")
+    LiveData<SWItem> getSWItemLiveData(String search);
 
 }

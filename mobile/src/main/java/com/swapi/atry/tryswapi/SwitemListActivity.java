@@ -1,10 +1,13 @@
 package com.swapi.atry.tryswapi;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +30,7 @@ import com.swapi.atry.tryswapi.repository.local.SWLocalRepoImpl;
 import com.swapi.atry.tryswapi.repository.remote.SWRemoteRepo;
 import com.swapi.atry.tryswapi.repository.remote.SWRemoteRepoImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -50,7 +54,8 @@ public class SwitemListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
     private Disposable disposable;
-
+    private SWItemViewModel swItemViewModel;
+    private SimpleItemRecyclerViewAdapter simpleItemRecyclerViewAdapter;
 
     @Override
     protected void onDestroy() {
@@ -94,7 +99,7 @@ public class SwitemListActivity extends AppCompatActivity {
                     SWDB.class, DBConstant.DB_NAME).build();
         SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swDao());
         SWItemRepo swItemRepo = new SWItemRepoImpl(swLocalRepo, swRemoteRepo);
-        disposable = swItemRepo.getSWItem("R2")
+        disposable = swItemRepo.getSWItemObservable("Obi")
                         .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWItem>() {
                     @Override
                     public void onNext(SWItem swItem) {
@@ -119,17 +124,28 @@ public class SwitemListActivity extends AppCompatActivity {
 
         ///end test
 
+        swItemViewModel = ViewModelProviders.of(this).get(SWItemViewModel.class);
+        swItemViewModel.getSWItemLiveData("R2-D2").observe(this, new Observer<SWItem>() {
+            @Override
+            public void onChanged(@Nullable SWItem swItem) {
+                simpleItemRecyclerViewAdapter.mValues.clear();
+                simpleItemRecyclerViewAdapter.mValues.add(swItem);
+                
+
+            }
+        });
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
+        simpleItemRecyclerViewAdapter = new SimpleItemRecyclerViewAdapter(this, mTwoPane);
+        recyclerView.setAdapter(simpleItemRecyclerViewAdapter);
     }
 
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final SwitemListActivity mParentActivity;
-        private final List<DummyContent.DummyItem> mValues;
+        private final List<SWItem> mValues = new ArrayList<>();
         private final boolean mTwoPane;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
@@ -154,9 +170,7 @@ public class SwitemListActivity extends AppCompatActivity {
         };
 
         SimpleItemRecyclerViewAdapter(SwitemListActivity parent,
-                                      List<DummyContent.DummyItem> items,
                                       boolean twoPane) {
-            mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
         }
@@ -170,8 +184,8 @@ public class SwitemListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
+            holder.mIdView.setText(mValues.get(position).getName());
+            holder.mContentView.setText(mValues.get(position).getHomeWorld());
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);

@@ -1,5 +1,7 @@
 package com.swapi.atry.tryswapi.repository.local;
 
+import android.arch.lifecycle.LiveData;
+
 import com.swapi.atry.tryswapi.repository.dto.SWItem;
 
 import java.util.concurrent.Callable;
@@ -21,6 +23,11 @@ public class SWLocalRepoImpl implements SWLocalRepo {
                 return swItemDao.getSWItem(search);
             }
         });
+    }
+
+    @Override
+    public LiveData<SWItem> getSWItemLiveData(String search) {
+        return swItemDao.getSWItemLiveData(search);
     }
 
     @Override

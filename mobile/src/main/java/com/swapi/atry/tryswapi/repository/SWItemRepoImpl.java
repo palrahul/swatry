@@ -1,5 +1,6 @@
 package com.swapi.atry.tryswapi.repository;
 
+import android.arch.lifecycle.LiveData;
 import android.util.Log;
 
 import com.swapi.atry.tryswapi.repository.dto.SWItem;
@@ -22,7 +23,7 @@ public class SWItemRepoImpl implements SWItemRepo{
     }
 
     @Override
-    public Observable<SWItem> getSWItem(String search) {
+    public Observable<SWItem> getSWItemObservable(String search) {
 
         return Observable.mergeDelayError(
                 swRemoteRepo
@@ -53,5 +54,10 @@ public class SWItemRepoImpl implements SWItemRepo{
                         .subscribeOn(Schedulers.io())
         );
 
+    }
+
+    @Override
+    public LiveData<SWItem> getSWItemLiveData(String search) {
+        return swLocalRepo.getSWItemLiveData(search);
     }
 }
