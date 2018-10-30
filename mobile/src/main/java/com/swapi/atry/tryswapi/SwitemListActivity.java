@@ -120,6 +120,7 @@ public class SwitemListActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+
                 swItemViewModel.getSWItemLiveData(query).observe(SwitemListActivity.this, new Observer<SWItem>() {
                     @Override
                     public void onChanged(@Nullable SWItem swItem) {
@@ -134,10 +135,15 @@ public class SwitemListActivity extends AppCompatActivity {
                         .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWItem>() {
                             @Override
                             public void onNext(SWItem swItem) {
-                                if(swItem != null)
+                                if(swItem != null) {
                                     Log.d(TAG, "Found SW item : " + swItem.getName());
+                                    simpleItemRecyclerViewAdapter.mValues.clear();
+                                    simpleItemRecyclerViewAdapter.mValues.add(swItem);
+                                    simpleItemRecyclerViewAdapter.notifyDataSetChanged();
+                                }
+
                                 else
-                                    Log.d(TAG, "NOPE");
+                                    Log.d(TAG, "STAR TREK !  maybe");
                             }
 
                             @Override
@@ -150,6 +156,8 @@ public class SwitemListActivity extends AppCompatActivity {
 
                             }
                         });
+
+
 
                 return false;
             }
