@@ -12,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -71,6 +72,8 @@ public class SwitemListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
+        SearchView searchView = (SearchView) findViewById(R.id.searchView);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,45 +95,68 @@ public class SwitemListActivity extends AppCompatActivity {
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
 
-        /// test
+        /// Exploring a DB first and merging Observable
+        /// Giving up this in favor of DB/LocalRepo as single source of truth for UI
+
         SWRemoteRepo swRemoteRepo = new SWRemoteRepoImpl();
         SWDB swdb = Room.databaseBuilder(getApplicationContext(),
                     SWDB.class, DBConstant.DB_NAME).build();
         SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swDao());
         SWItemRepo swItemRepo = new SWItemRepoImpl(swLocalRepo, swRemoteRepo);
-        disposable = swItemRepo.getSWItemObservable("R2-D2")
-                        .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWItem>() {
-                    @Override
-                    public void onNext(SWItem swItem) {
-                        if(swItem != null)
-                            Log.d(TAG, "Found SW item : " + swItem.getName());
-                        else
-                            Log.d(TAG, "NOPE");
-                    }
 
-                    @Override
-                    public void onError(Throwable e) {
 
-                    }
+        //LiveData impl
+        swItemViewModel = ViewModelProviders.of(this).get(SWItemViewModel.class);
+//        swItemViewModel.getSWItemLiveData("R2-D2").observe(this, new Observer<SWItem>() {
+//            @Override
+//            public void onChanged(@Nullable SWItem swItem) {
+//                simpleItemRecyclerViewAdapter.mValues.clear();
+//                simpleItemRecyclerViewAdapter.mValues.add(swItem);
+//                simpleItemRecyclerViewAdapter.notifyDataSetChanged();
+//
+//            }
+//        });
 
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                swItemViewModel.getSWItemLiveData(query).observe(SwitemListActivity.this, new Observer<SWItem>() {
                     @Override
-                    public void onComplete() {
+                    public void onChanged(@Nullable SWItem swItem) {
+                        simpleItemRecyclerViewAdapter.mValues.clear();
+                        simpleItemRecyclerViewAdapter.mValues.add(swItem);
+                        simpleItemRecyclerViewAdapter.notifyDataSetChanged();
 
                     }
                 });
 
+                disposable = swItemRepo.getSWItemObservable(query)
+                        .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWItem>() {
+                            @Override
+                            public void onNext(SWItem swItem) {
+                                if(swItem != null)
+                                    Log.d(TAG, "Found SW item : " + swItem.getName());
+                                else
+                                    Log.d(TAG, "NOPE");
+                            }
 
+                            @Override
+                            public void onError(Throwable e) {
 
-        ///end test
+                            }
 
-        swItemViewModel = ViewModelProviders.of(this).get(SWItemViewModel.class);
-        swItemViewModel.getSWItemLiveData("R2-D2").observe(this, new Observer<SWItem>() {
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+
+                return false;
+            }
+
             @Override
-            public void onChanged(@Nullable SWItem swItem) {
-                simpleItemRecyclerViewAdapter.mValues.clear();
-                simpleItemRecyclerViewAdapter.mValues.add(swItem);
-                simpleItemRecyclerViewAdapter.notifyDataSetChanged();
-
+            public boolean onQueryTextChange(String newText) {
+                return false;
             }
         });
     }
@@ -152,7 +178,7 @@ public class SwitemListActivity extends AppCompatActivity {
                 SWItem item = (SWItem) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(SwitemDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
+                    arguments.putParcelable(SwitemDetailFragment.ARG_ITEM, item);
                     SwitemDetailFragment fragment = new SwitemDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -161,8 +187,7 @@ public class SwitemListActivity extends AppCompatActivity {
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, SwitemDetailActivity.class);
-                    intent.putExtra(SwitemDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
-
+                    intent.putExtra(SwitemDetailFragment.ARG_ITEM, item);
                     context.startActivity(intent);
                 }
             }
@@ -183,11 +208,13 @@ public class SwitemListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).getName());
-            holder.mContentView.setText(mValues.get(position).getHomeWorld());
+            if(!mValues.isEmpty() && mValues.get(position) != null) {
+                holder.mIdView.setText(mValues.get(position).getName());
+                holder.mContentView.setText(mValues.get(position).getHomeWorld());
 
-            holder.itemView.setTag(mValues.get(position));
-            holder.itemView.setOnClickListener(mOnClickListener);
+                holder.itemView.setTag(mValues.get(position));
+                holder.itemView.setOnClickListener(mOnClickListener);
+            }
         }
 
         @Override

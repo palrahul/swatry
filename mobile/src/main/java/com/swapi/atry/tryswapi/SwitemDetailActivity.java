@@ -54,8 +54,8 @@ public class SwitemDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SwitemDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(SwitemDetailFragment.ARG_ITEM_ID));
+            arguments.putParcelable(SwitemDetailFragment.ARG_ITEM,
+                    getIntent().getParcelableExtra(SwitemDetailFragment.ARG_ITEM));
             SwitemDetailFragment fragment = new SwitemDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()

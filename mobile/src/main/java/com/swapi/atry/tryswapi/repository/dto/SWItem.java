@@ -3,6 +3,8 @@ package com.swapi.atry.tryswapi.repository.dto;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 import com.swapi.atry.tryswapi.repository.local.DBConstant;
@@ -10,7 +12,16 @@ import com.swapi.atry.tryswapi.repository.local.DBConstant;
 import java.util.ArrayList;
 
 @Entity(tableName = DBConstant.SW_ITEM_TABLE_NAME)
-public class SWItem {
+public class SWItem implements Parcelable {
+
+    public SWItem() {
+    }
+
+    public SWItem(Parcel in) {
+        setName(in.readString());
+        setHomeWorld(in.readString());
+        setGender(in.readString());
+    }
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = DBConstant.ID)
@@ -217,4 +228,49 @@ public class SWItem {
     public void setSpecies(ArrayList<String> species) {
         this.species = species;
     }
+
+    @Override
+    public String toString() {
+        return "SWItem{" +
+                "homeWorld='" + homeWorld + '\'' +
+                ", birthYear='" + birthYear + '\'' +
+                ", skinColor='" + skinColor + '\'' +
+                ", vehicles=" + vehicles +
+                ", url='" + url + '\'' +
+                ", created='" + created + '\'' +
+                ", edited='" + edited + '\'' +
+                ", hairColor='" + hairColor + '\'' +
+                ", height='" + height + '\'' +
+                ", species=" + species +
+                ", films=" + films +
+                ", gender='" + gender + '\'' +
+                ", mass='" + mass + '\'' +
+                ", name='" + name + '\'' +
+                ", eyeColor='" + eyeColor + '\'' +
+                ", starships=" + starships +
+                '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(getName());
+        dest.writeString(getHomeWorld());
+        dest.writeString(getGender());
+        //add more
+    }
+
+    public static final Parcelable.Creator<SWItem> CREATOR = new Parcelable.Creator<SWItem>() {
+        public SWItem createFromParcel(Parcel source) {
+            return new SWItem(source);
+        }
+        @Override
+        public SWItem[] newArray(int size) {
+            return new SWItem[size];
+        }
+    };
 }
