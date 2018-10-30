@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.swapi.atry.tryswapi.dummy.DummyContent;
 import com.swapi.atry.tryswapi.repository.SWItemRepo;
 import com.swapi.atry.tryswapi.repository.SWItemRepoImpl;
 import com.swapi.atry.tryswapi.repository.dto.SWItem;
@@ -99,7 +98,7 @@ public class SwitemListActivity extends AppCompatActivity {
                     SWDB.class, DBConstant.DB_NAME).build();
         SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swDao());
         SWItemRepo swItemRepo = new SWItemRepoImpl(swLocalRepo, swRemoteRepo);
-        disposable = swItemRepo.getSWItemObservable("Obi")
+        disposable = swItemRepo.getSWItemObservable("R2-D2")
                         .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWItem>() {
                     @Override
                     public void onNext(SWItem swItem) {
@@ -130,7 +129,7 @@ public class SwitemListActivity extends AppCompatActivity {
             public void onChanged(@Nullable SWItem swItem) {
                 simpleItemRecyclerViewAdapter.mValues.clear();
                 simpleItemRecyclerViewAdapter.mValues.add(swItem);
-                
+                simpleItemRecyclerViewAdapter.notifyDataSetChanged();
 
             }
         });
@@ -150,10 +149,10 @@ public class SwitemListActivity extends AppCompatActivity {
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
+                SWItem item = (SWItem) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(SwitemDetailFragment.ARG_ITEM_ID, item.id);
+                    arguments.putString(SwitemDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
                     SwitemDetailFragment fragment = new SwitemDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -162,7 +161,7 @@ public class SwitemListActivity extends AppCompatActivity {
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, SwitemDetailActivity.class);
-                    intent.putExtra(SwitemDetailFragment.ARG_ITEM_ID, item.id);
+                    intent.putExtra(SwitemDetailFragment.ARG_ITEM_ID, String.valueOf(item.getId()));
 
                     context.startActivity(intent);
                 }
