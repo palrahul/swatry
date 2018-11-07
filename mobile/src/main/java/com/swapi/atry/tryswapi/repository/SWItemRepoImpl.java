@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.util.Log;
 
 import com.swapi.atry.tryswapi.repository.dto.SWItem;
+import com.swapi.atry.tryswapi.repository.dto.SWPlanet;
 import com.swapi.atry.tryswapi.repository.local.SWLocalRepo;
 import com.swapi.atry.tryswapi.repository.remote.SWRemoteRepo;
 import com.swapi.atry.tryswapi.repository.remote.SWSearch;
@@ -49,8 +50,8 @@ public class SWItemRepoImpl implements SWItemRepo{
                     .subscribeOn(Schedulers.io()),
                 swLocalRepo
                         .getSWItem(search)
-                        .doOnError(some -> Log.e("TAG", "Local: " + some.getLocalizedMessage()))
-                        .doOnNext(some -> Log.d("TAG", "Local: " + some.getName()))
+                        .doOnError(some -> Log.e("TAG", "Item Local err: " + some.getLocalizedMessage()))
+                        .doOnNext(some -> Log.d("TAG", "Item Local nxt: " + some.getName()))
                         .subscribeOn(Schedulers.io())
         );
 
@@ -59,5 +60,31 @@ public class SWItemRepoImpl implements SWItemRepo{
     @Override
     public LiveData<SWItem> getSWItemLiveData(String search) {
         return swLocalRepo.getSWItemLiveData(search);
+    }
+
+    @Override
+    public Observable<SWPlanet> getSWPlanetObservable(String search) {
+        return Observable.mergeDelayError(
+                swRemoteRepo
+                        .getSWPlanet(search).doOnNext(new Consumer<SWPlanet>() {
+                            @Override
+                            public void accept(SWPlanet swPlanet) throws Exception {
+                                    Log.d("TAG", "Planet Remote: " + swPlanet.getName());
+
+                            }
+                        })
+                        .doOnError(some -> Log.e("TAG", " Planet Remote: " +some.getLocalizedMessage()))
+                        .subscribeOn(Schedulers.io()),
+                swLocalRepo
+                        .getSWPlanet(search)
+                        .doOnError(some -> Log.e("TAG", "Planet Local: " + some.getLocalizedMessage()))
+                        .doOnNext(some -> Log.d("TAG", "Planet Local: " + some.getName()))
+                        .subscribeOn(Schedulers.io())
+        );
+    }
+
+    @Override
+    public LiveData<SWPlanet> getSWPlanetLiveData(String id) {
+        return swLocalRepo.getSWPlanetLiveData(id);
     }
 }

@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.swapi.atry.tryswapi.repository.SWItemRepo;
 import com.swapi.atry.tryswapi.repository.SWItemRepoImpl;
 import com.swapi.atry.tryswapi.repository.dto.SWItem;
+import com.swapi.atry.tryswapi.repository.dto.SWPlanet;
 import com.swapi.atry.tryswapi.repository.local.DBConstant;
 import com.swapi.atry.tryswapi.repository.local.SWDB;
 import com.swapi.atry.tryswapi.repository.local.SWLocalRepo;
@@ -101,21 +102,12 @@ public class SwitemListActivity extends AppCompatActivity {
         SWRemoteRepo swRemoteRepo = new SWRemoteRepoImpl();
         SWDB swdb = Room.databaseBuilder(getApplicationContext(),
                     SWDB.class, DBConstant.DB_NAME).build();
-        SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swDao());
+        SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swItemDao(), swdb.swPlanetDao());
         SWItemRepo swItemRepo = new SWItemRepoImpl(swLocalRepo, swRemoteRepo);
 
 
         //LiveData impl
         swItemViewModel = ViewModelProviders.of(this).get(SWItemViewModel.class);
-//        swItemViewModel.getSWItemLiveData("R2-D2").observe(this, new Observer<SWItem>() {
-//            @Override
-//            public void onChanged(@Nullable SWItem swItem) {
-//                simpleItemRecyclerViewAdapter.mValues.clear();
-//                simpleItemRecyclerViewAdapter.mValues.add(swItem);
-//                simpleItemRecyclerViewAdapter.notifyDataSetChanged();
-//
-//            }
-//        });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -137,6 +129,8 @@ public class SwitemListActivity extends AppCompatActivity {
                             public void onNext(SWItem swItem) {
                                 if(swItem != null) {
                                     Log.d(TAG, "Found SW item : " + swItem.getName());
+
+                                    //TODO get rid of this and just use LiveData so we use only DB as source of truth
                                     simpleItemRecyclerViewAdapter.mValues.clear();
                                     simpleItemRecyclerViewAdapter.mValues.add(swItem);
                                     simpleItemRecyclerViewAdapter.notifyDataSetChanged();
@@ -158,6 +152,29 @@ public class SwitemListActivity extends AppCompatActivity {
                         });
 
 
+                //TEST
+                disposable = swItemRepo.getSWPlanetObservable("1")
+                        .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWPlanet>() {
+                            @Override
+                            public void onNext(SWPlanet swItem) {
+                                if(swItem != null) {
+                                    Log.d(TAG, "Found SW Planet : " + swItem.getName());
+                                }
+
+                                else
+                                    Log.d(TAG, "STAR TREK !  maybe");
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
 
                 return false;
             }
@@ -218,7 +235,7 @@ public class SwitemListActivity extends AppCompatActivity {
         public void onBindViewHolder(final ViewHolder holder, int position) {
             if(!mValues.isEmpty() && mValues.get(position) != null) {
                 holder.mIdView.setText(mValues.get(position).getName());
-                holder.mContentView.setText(mValues.get(position).getHomeWorld());
+                holder.mContentView.setText(mValues.get(position).getGender());
 
                 holder.itemView.setTag(mValues.get(position));
                 holder.itemView.setOnClickListener(mOnClickListener);

@@ -5,6 +5,7 @@ public interface DBConstant {
 
     String DB_NAME = "sw_api_fun";
     String SW_ITEM_TABLE_NAME = "SWItems";
+    String SW_PLANET_TABLE_NAME = "SWPlanets";
 
     //table fields
     String ID = "id";
@@ -24,6 +25,7 @@ public interface DBConstant {
     String NAME ="name";
     String EYE_COLOR = "eye_color";
     String STARSHIP_ARRAY = "starships";
+    String RESIDENT_ARRAY = "residents";
 
 
 }

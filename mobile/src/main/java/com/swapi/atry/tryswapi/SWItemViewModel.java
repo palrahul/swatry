@@ -25,7 +25,7 @@ public class SWItemViewModel extends AndroidViewModel {
         SWRemoteRepo swRemoteRepo = new SWRemoteRepoImpl();
         SWDB swdb = Room.databaseBuilder(application.getApplicationContext(),
                 SWDB.class, DBConstant.DB_NAME).build();
-        SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swDao());
+        SWLocalRepo swLocalRepo = new SWLocalRepoImpl(swdb.swItemDao(), swdb.swPlanetDao());
         swItemRepo = new SWItemRepoImpl(swLocalRepo, swRemoteRepo);
     }
 
