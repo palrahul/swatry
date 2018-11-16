@@ -23,7 +23,6 @@ import android.widget.TextView;
 import com.swapi.atry.tryswapi.repository.SWItemRepo;
 import com.swapi.atry.tryswapi.repository.SWItemRepoImpl;
 import com.swapi.atry.tryswapi.repository.dto.SWItem;
-import com.swapi.atry.tryswapi.repository.dto.SWPlanet;
 import com.swapi.atry.tryswapi.repository.local.DBConstant;
 import com.swapi.atry.tryswapi.repository.local.SWDB;
 import com.swapi.atry.tryswapi.repository.local.SWLocalRepo;
@@ -134,31 +133,6 @@ public class SwitemListActivity extends AppCompatActivity {
                                     simpleItemRecyclerViewAdapter.mValues.clear();
                                     simpleItemRecyclerViewAdapter.mValues.add(swItem);
                                     simpleItemRecyclerViewAdapter.notifyDataSetChanged();
-                                }
-
-                                else
-                                    Log.d(TAG, "STAR TREK !  maybe");
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-
-                            }
-
-                            @Override
-                            public void onComplete() {
-
-                            }
-                        });
-
-
-                //TEST
-                disposable = swItemRepo.getSWPlanetObservable("1")
-                        .observeOn(AndroidSchedulers.mainThread()).subscribeWith(new DisposableObserver<SWPlanet>() {
-                            @Override
-                            public void onNext(SWPlanet swItem) {
-                                if(swItem != null) {
-                                    Log.d(TAG, "Found SW Planet : " + swItem.getName());
                                 }
 
                                 else

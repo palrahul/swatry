@@ -15,11 +15,11 @@ public interface SWPlanetDao {
     void addSWPlanet(SWPlanet swPlanet);
 
     @Query("SELECT *" + " FROM  " + DBConstant.SW_PLANET_TABLE_NAME + " WHERE "
-            + DBConstant.NAME + " LIKE " + ":id" + " LIMIT 1")
+            + DBConstant.URL + " LIKE " + ":id" + " LIMIT 1")
     SWPlanet getSWPlanet(String id);
 
     @Query("SELECT *" + " FROM  " + DBConstant.SW_PLANET_TABLE_NAME + " WHERE "
-            + DBConstant.NAME + " LIKE " + ":id" + " LIMIT 1")
+            + DBConstant.URL + " LIKE " + ":id" + " LIMIT 1")
     LiveData<SWPlanet> getSWPlanetLiveData(String id);
 
 }

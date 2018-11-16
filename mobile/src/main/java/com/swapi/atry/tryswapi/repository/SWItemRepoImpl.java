@@ -70,6 +70,7 @@ public class SWItemRepoImpl implements SWItemRepo{
                             @Override
                             public void accept(SWPlanet swPlanet) throws Exception {
                                     Log.d("TAG", "Planet Remote: " + swPlanet.getName());
+                                    swLocalRepo.addSWPlanet(swPlanet);
 
                             }
                         })

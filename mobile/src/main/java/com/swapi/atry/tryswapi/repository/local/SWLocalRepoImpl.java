@@ -23,7 +23,7 @@ public class SWLocalRepoImpl implements SWLocalRepo {
         return Observable.fromCallable(new Callable<SWItem>() {
             @Override
             public SWItem call() throws Exception {
-                return swItemDao.getSWItem(search);
+                return swItemDao.getSWItem("%" + search + "%");
             }
         });
     }
@@ -43,14 +43,14 @@ public class SWLocalRepoImpl implements SWLocalRepo {
         return Observable.fromCallable(new Callable<SWPlanet>() {
             @Override
             public SWPlanet call() throws Exception {
-                return swPlanetDao.getSWPlanet(id);
+                return swPlanetDao.getSWPlanet("%" + id + "%");
             }
         });
     }
 
     @Override
     public LiveData<SWPlanet> getSWPlanetLiveData(String id) {
-        return swPlanetDao.getSWPlanetLiveData("%" + id + "%");
+        return swPlanetDao.getSWPlanetLiveData("%/" + id + "/");
     }
 
     @Override

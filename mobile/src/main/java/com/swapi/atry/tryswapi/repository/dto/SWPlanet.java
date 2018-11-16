@@ -26,12 +26,17 @@ public class SWPlanet implements Parcelable {
     @ColumnInfo(name = DBConstant.RESIDENT_ARRAY)
     private ArrayList<String> residents;
 
+    @SerializedName("url")
+    @ColumnInfo(name = DBConstant.URL)
+    private String url;
+
     public SWPlanet() {
     }
 
     public SWPlanet(Parcel in) {
         setName(in.readString());
         in.readList(residents, null);
+        setUrl(in.readString());
     }
 
     public int getId() {
@@ -60,6 +65,13 @@ public class SWPlanet implements Parcelable {
         this.residents = residents;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     @Override
     public int describeContents() {
@@ -70,6 +82,7 @@ public class SWPlanet implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getName());
         dest.writeArray(new ArrayList[]{getResidents()});
+        dest.writeString(getUrl());
         //add more
     }
 
